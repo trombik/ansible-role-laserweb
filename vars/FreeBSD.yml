@@ -1,0 +1,3 @@
+---
+__laserweb_db_dir: /var/db/laserweb
+__laserweb_conf_dir: /usr/local/etc/laserweb

@@ -1,0 +1,6 @@
+---
+
+- name: Restart laserweb
+  service:
+    name: laserweb
+    state: restarted

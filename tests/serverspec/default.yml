@@ -1,0 +1,6 @@
+---
+- hosts: localhost
+  roles:
+    - ansible-role-laserweb
+  vars:
+    laserweb_config: ""

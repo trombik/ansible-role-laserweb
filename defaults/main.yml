@@ -1,0 +1,9 @@
+---
+laserweb_user: laserweb
+laserweb_group: laserweb
+laserweb_log_dir: /var/log/laserweb
+laserweb_db_dir: "{{ __laserweb_db_dir }}"
+laserweb_service: laserweb
+laserweb_conf_dir: "{{ __laserweb_conf_dir }}"
+laserweb_conf_file: "{{ __laserweb_conf_dir }}/laserweb.conf"
+laserweb_flags: ""
