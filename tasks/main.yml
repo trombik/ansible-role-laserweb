@@ -13,5 +13,5 @@
 - name: Wait for laserweb_service
   wait_for:
     delay: 10
-    host: "{{ laserweb_host }}"
+    host: "{{ laserweb_hosts | first }}"
     port: "{{ laserweb_port }}"

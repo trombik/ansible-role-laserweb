@@ -35,7 +35,7 @@
       }
       http {
         upstream backend {
-          server {{ laserweb_host }}:{{ laserweb_port }};
+          server {{ laserweb_hosts | first }}:{{ laserweb_port }};
           keepalive 60;
         }
         include {{ nginx_conf_dir }}/mime.types;

@@ -4,7 +4,8 @@ laserweb_user: laserweb
 laserweb_group: laserweb
 laserweb_extra_groups: "{{ __laserweb_extra_groups }}"
 laserweb_service: "{{ __laserweb_service }}"
-laserweb_host: 127.0.0.1
+laserweb_hosts:
+  - 127.0.0.1
 laserweb_port: 8000
 
 laserweb_backend_dir: /home/lw.comm-server
