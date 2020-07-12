@@ -1,0 +1,6 @@
+---
+
+- name: trombik.nodejs
+- name: trombik.git
+- name: trombik.apt_repo
+- name: trombik.nginx

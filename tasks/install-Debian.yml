@@ -1,0 +1,103 @@
+---
+
+# https://github.com/LaserWeb/LaserWeb4/blob/dev-es6/.travis.yml
+# https://github.com/LaserWeb/LaserWeb4/issues/562#issuecomment-652841982
+- name: Install laserweb_extra_packages
+  apt:
+    name: "{{ laserweb_extra_packages }}"
+    state: present
+
+- name: Do clone LaserWeb4
+  git:
+    repo: https://github.com/trombik/LaserWeb4.git
+    dest: "{{ laserweb_fontend_dir }}"
+    version: sync-package-json
+
+- name: Install npm packages (laserweb_fontend_dir)
+  npm:
+    unsafe_perm: yes
+    # XXX this should be true, but ansible `npm` module always report
+    # `changed`. see https://github.com/ansible/ansible/issues/58280
+    ci: false
+    path: "{{ laserweb_fontend_dir }}"
+  register: __laserweb_install_npm_package_frontend
+
+- name: Install installdev
+  command: npm --unsafe-perm run installdev
+  args:
+    chdir: "{{ laserweb_fontend_dir }}"
+    creates: "{{ laserweb_fontend_dir }}/node_modules"
+
+
+- name: Install bundle-dev
+  # XXX this is NOOP
+  command: npm --unsafe-perm run bundle-dev
+  args:
+    chdir: "{{ laserweb_fontend_dir }}"
+    creates: "{{ laserweb_fontend_dir }}/node_modules"
+
+- name: Do clone lw.comm-server
+  git:
+    repo: https://github.com/trombik/lw.comm-server.git
+    dest: "{{ laserweb_backend_dir }}"
+    version: test-ci
+
+- name: Install npm packages (laserweb_backend_dir)
+  npm:
+    unsafe_perm: yes
+    # XXX this should be true, but ansible `npm` module always report
+    # `changed`. see https://github.com/ansible/ansible/issues/58280
+    ci: false
+    path: "{{ laserweb_backend_dir }}"
+  register: __laserweb_install_npm_package
+
+- name: Run electron-rebuild
+  # XXX serialport must be rebuilt
+  # http://meow.noopkat.com/using-node-serialport-in-an-electron-app/
+  command: node ./node_modules/.bin/electron-rebuild --force --which-module serialport
+  args:
+    chdir: "{{ laserweb_backend_dir }}"
+  when: __laserweb_install_npm_package.changed
+
+- name: Run npm run dist
+  command: npm --unsafe-perm run dist
+  args:
+    chdir: "{{ laserweb_backend_dir }}"
+    creates: "{{ laserweb_backend_dir }}/dist/lw.comm-server-*-x86_64.AppImage"
+  environment:
+    USE_SYSTEM_XORRISO: "true"
+
+- name: Run npm rebuild
+  command: npm --unsafe-perm rebuild
+  args:
+    chdir: "{{ laserweb_backend_dir }}"
+  when: __laserweb_install_npm_package.changed
+
+- name: Create laserweb_group
+  group:
+    name: "{{ laserweb_group }}"
+
+- name: Create laserweb_user
+  user:
+    name: "{{ laserweb_user }}"
+    group: "{{ laserweb_group }}"
+    groups:
+      - dialout
+    create_home: no
+    comment: LaserWeb user
+    home: "{{ laserweb_backend_dir }}"
+
+- name: Create systemd service file
+  template:
+    src: systemd.service.j2
+    dest: "/etc/systemd/system/{{ laserweb_backend_service }}.service"
+  register: __laserweb_systemd_config
+
+- name: Reload systemd (daemon-reload)
+  command: systemctl daemon-reload
+  when: __laserweb_systemd_config.changed
+
+- name: Eanble laserweb_backend_service
+  service:
+    name: "{{ laserweb_backend_service }}"
+    enabled: yes

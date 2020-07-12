@@ -1,6 +1,6 @@
 ---
 
-- name: Restart laserweb
+- name: Restart laserweb_backend_service
   service:
-    name: laserweb
+    name: "{{ laserweb_backend_service }}"
     state: restarted

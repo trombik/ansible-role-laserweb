@@ -5,33 +5,13 @@
 
 - include: "install-{{ ansible_os_family }}.yml"
 
-- name: Create log directory
-  file:
-    path: "{{ laserweb_log_dir }}"
-    mode: 0755
-    owner: "{{ laserweb_user }}"
-    group: "{{ laserweb_group }}"
-    state: directory
-  notify: Restart laserweb
-
-- name: Create db directory
-  file:
-    path: "{{ laserweb_db_dir }}"
-    mode: 0755
-    owner: "{{ laserweb_user }}"
-    group: "{{ laserweb_group }}"
-    state: directory
-  notify: Restart laserweb
-
-- name: Create laserweb.conf
-  template:
-    src: laserweb.conf.j2
-    dest: "{{ laserweb_conf_file }}"
-    validate: echo %s
-  notify: Restart laserweb
-
-- name: Start laserweb
+- name: Start laserweb_backend_service
   service:
-    name: "{{ laserweb_service }}"
-    enabled: true
+    name: "{{ laserweb_backend_service }}"
     state: started
+
+- name: Wait for laserweb_backend_service
+  wait_for:
+    delay: 10
+    host: "{{ laserweb_host }}"
+    port: "{{ laserweb_port }}"

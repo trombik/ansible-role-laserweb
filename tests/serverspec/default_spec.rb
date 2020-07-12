@@ -1,48 +1,49 @@
 require "spec_helper"
 require "serverspec"
 
-package = "laserweb"
-service = "laserweb"
-config  = "/etc/laserweb/laserweb.conf"
+service = "lw.comm-server"
 user    = "laserweb"
 group   = "laserweb"
-ports   = [PORTS]
-log_dir = "/var/log/laserweb"
-db_dir  = "/var/lib/laserweb"
+groups  = %w[dialout]
+ports   = [80, 8000]
+branch_backend = "test-ci"
+branch_frontend = "sync-package-json"
+repo_dir_backend = "/home/lw.comm-server"
+repo_dir_frontend = "/home/LaserWeb4"
+
+describe user(user) do
+  it { should exist }
+  it { should belong_to_primary_group group }
+  groups.each do |g|
+    it { should belong_to_group g }
+  end
+end
+
+describe file repo_dir_backend do
+  it { should be_directory }
+end
+
+describe file repo_dir_frontend do
+  it { should be_directory }
+end
+
+describe command "cd #{repo_dir_backend} && git branch --list --color=never" do
+  its(:exit_status) { should eq 0 }
+  its(:stderr) { should eq "" }
+  its(:stdout) { should match(/\*\s+#{branch_backend}$/) }
+end
+
+describe command "cd #{repo_dir_frontend} && git branch --list --color=never" do
+  its(:exit_status) { should eq 0 }
+  its(:stderr) { should eq "" }
+  its(:stdout) { should match(/\*\s+#{branch_frontend}$/) }
+end
 
 case os[:family]
-when "freebsd"
-  config = "/usr/local/etc/laserweb.conf"
-  db_dir = "/var/db/laserweb"
-end
-
-describe package(package) do
-  it { should be_installed }
-end
-
-describe file(config) do
-  it { should be_file }
-  its(:content) { should match Regexp.escape("laserweb") }
-end
-
-describe file(log_dir) do
-  it { should exist }
-  it { should be_mode 755 }
-  it { should be_owned_by user }
-  it { should be_grouped_into group }
-end
-
-describe file(db_dir) do
-  it { should exist }
-  it { should be_mode 755 }
-  it { should be_owned_by user }
-  it { should be_grouped_into group }
-end
-
-case os[:family]
-when "freebsd"
-  describe file("/etc/rc.conf.d/laserweb") do
+when "ubuntu"
+  describe file "/etc/systemd/system/#{service}.service" do
     it { should be_file }
+    its(:content) { should match(/Managed by ansible/) }
   end
 end
 

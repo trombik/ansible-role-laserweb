@@ -1,0 +1,14 @@
+---
+__laserweb_extra_packages:
+  - icnsutils
+  - graphicsmagick
+  - xz-utils
+  # ldd /root/.cache/electron-builder/AppImage/AppImage-09-07-16-linux/xorriso
+  # libreadline.so.6 => not found
+  #
+  # env USE_SYSTEM_XORRISO must be set to "true" (not `yes` or other string)
+  - xorriso
+  # nodejs 10
+  - gcc
+  - g++
+  - make

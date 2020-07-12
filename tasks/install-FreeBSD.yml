@@ -1,6 +1,0 @@
----
-
-- name: Install laserweb
-  pkgng:
-    name: laserweb
-    state: present

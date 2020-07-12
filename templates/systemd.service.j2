@@ -1,0 +1,20 @@
+# Managed by ansible
+
+[Unit]
+Description=LaserWeb4 server
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/node {{ laserweb_backend_dir }}/server.js
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier={{ laserweb_backend_service }}
+WorkingDirectory={{ laserweb_backend_dir }}
+User={{ laserweb_user }}
+#Group=<alternate group>
+Environment=NODE_ENV=production PORT={{ laserweb_port }}
+
+[Install]
+WantedBy=multi-user.target
