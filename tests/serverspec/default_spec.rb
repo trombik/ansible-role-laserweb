@@ -1,15 +1,25 @@
 require "spec_helper"
 require "serverspec"
+require "shellwords"
 
-service = "lw.comm-server"
+backend_service = "lw.comm-server"
+backend_repo_path = "/home/lw.comm-server"
+services = %w[nginx] << backend_service
 user    = "laserweb"
 group   = "laserweb"
 groups  = %w[dialout]
 ports   = [80, 8000]
-branch_backend = "test-ci"
-branch_frontend = "sync-package-json"
-repo_dir_backend = "/home/lw.comm-server"
-repo_dir_frontend = "/home/LaserWeb4"
+
+repos = [
+  {
+    path: backend_repo_path,
+    version: "test-ci"
+  },
+  {
+    path: "/home/LaserWeb4",
+    version: "sync-package-json"
+  }
+]
 
 describe user(user) do
   it { should exist }
@@ -19,37 +29,42 @@ describe user(user) do
   end
 end
 
-describe file repo_dir_backend do
-  it { should be_directory }
+repos.each do |repo|
+  describe file repo[:path] do
+    it { should be_directory }
+  end
+  describe command "cd #{repo[:path].shellescape} && git status --short" do
+    its(:exit_status) { should eq 0 }
+    its(:stderr) { should eq "" }
+    its(:stdout) { should_not match(/^\s+M\s+.*/) }
+  end
+
+  describe command "cd #{repo[:path].shellescape} && git branch --list --color=never" do
+    its(:exit_status) { should eq 0 }
+    its(:stderr) { should eq "" }
+    its(:stdout) { should match(/^\*\s+#{repo[:version]}$/) }
+  end
 end
 
-describe file repo_dir_frontend do
-  it { should be_directory }
-end
-
-describe command "cd #{repo_dir_backend} && git branch --list --color=never" do
+describe command "cd #{backend_repo_path.shellescape} && node ./node_modules/serialport/build/Release/serialport.node" do
   its(:exit_status) { should eq 0 }
   its(:stderr) { should eq "" }
-  its(:stdout) { should match(/\*\s+#{branch_backend}$/) }
-end
-
-describe command "cd #{repo_dir_frontend} && git branch --list --color=never" do
-  its(:exit_status) { should eq 0 }
-  its(:stderr) { should eq "" }
-  its(:stdout) { should match(/\*\s+#{branch_frontend}$/) }
+  its(:stdout) { should eq "" }
 end
 
 case os[:family]
 when "ubuntu"
-  describe file "/etc/systemd/system/#{service}.service" do
+  describe file "/etc/systemd/system/#{backend_service}.service" do
     it { should be_file }
     its(:content) { should match(/Managed by ansible/) }
   end
 end
 
-describe service(service) do
-  it { should be_running }
-  it { should be_enabled }
+services.each do |service|
+  describe service(service) do
+    it { should be_running }
+    it { should be_enabled }
+  end
 end
 
 ports.each do |p|
