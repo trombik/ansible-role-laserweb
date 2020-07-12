@@ -5,12 +5,12 @@
 
 - include: "install-{{ ansible_os_family }}.yml"
 
-- name: Start laserweb_backend_service
+- name: Start laserweb_service
   service:
-    name: "{{ laserweb_backend_service }}"
+    name: "{{ laserweb_service }}"
     state: started
 
-- name: Wait for laserweb_backend_service
+- name: Wait for laserweb_service
   wait_for:
     delay: 10
     host: "{{ laserweb_host }}"

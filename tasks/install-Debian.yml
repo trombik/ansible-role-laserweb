@@ -81,8 +81,7 @@
   user:
     name: "{{ laserweb_user }}"
     group: "{{ laserweb_group }}"
-    groups:
-      - dialout
+    groups: "{{ laserweb_extra_groups }}"
     create_home: no
     comment: LaserWeb user
     home: "{{ laserweb_backend_dir }}"
@@ -90,14 +89,14 @@
 - name: Create systemd service file
   template:
     src: systemd.service.j2
-    dest: "/etc/systemd/system/{{ laserweb_backend_service }}.service"
+    dest: "/etc/systemd/system/{{ laserweb_service }}.service"
   register: __laserweb_systemd_config
 
 - name: Reload systemd (daemon-reload)
   command: systemctl daemon-reload
   when: __laserweb_systemd_config.changed
 
-- name: Eanble laserweb_backend_service
+- name: Eanble laserweb_service
   service:
-    name: "{{ laserweb_backend_service }}"
+    name: "{{ laserweb_service }}"
     enabled: yes

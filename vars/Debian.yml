@@ -1,4 +1,5 @@
 ---
+__laserweb_service: lw.comm-server
 __laserweb_extra_packages:
   - icnsutils
   - graphicsmagick
@@ -12,3 +13,5 @@ __laserweb_extra_packages:
   - gcc
   - g++
   - make
+__laserweb_extra_groups:
+  - dialout

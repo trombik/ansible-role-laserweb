@@ -2,16 +2,14 @@
 laserweb_extra_packages: "{{ __laserweb_extra_packages }}"
 laserweb_user: laserweb
 laserweb_group: laserweb
-laserweb_log_dir: /var/log/laserweb
-laserweb_db_dir: "{{ __laserweb_db_dir }}"
-laserweb_service: laserweb
-laserweb_conf_dir: "{{ __laserweb_conf_dir }}"
-laserweb_conf_file: "{{ __laserweb_conf_dir }}/laserweb.conf"
-laserweb_flags: ""
-
+laserweb_extra_groups: "{{ __laserweb_extra_groups }}"
+laserweb_service: "{{ __laserweb_service }}"
 laserweb_host: 127.0.0.1
 laserweb_port: 8000
 
-laserweb_backend_service: lw.comm-server
 laserweb_backend_dir: /home/lw.comm-server
 laserweb_fontend_dir: /home/LaserWeb4
+
+laserweb_flags: ""
+laserweb_conf_dir: "{{ __laserweb_conf_dir }}"
+laserweb_conf_file: "{{ __laserweb_conf_dir }}/laserweb.conf"
